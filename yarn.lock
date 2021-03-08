@@ -838,6 +838,11 @@
   dependencies:
     tslib "^2.0.0"
 
+"@types/gaussian@^1.1.2":
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/@types/gaussian/-/gaussian-1.1.2.tgz#f26f32fded3d18cfb955b4a732233d521705ca10"
+  integrity sha512-Sp/66GNX7HPcooLy1HxmXTpJbFFAS1pz7fykSp7qe0kEnDcAcr5znnogvzT2tkKJWKOXM+btGEzObGS57gHQ3A==
+
 "@types/json-schema@^7.0.3":
   version "7.0.7"
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.7.tgz#98a993516c859eb0d5c4c8f098317a9ea68db9ad"
@@ -2218,6 +2223,11 @@ gauge@~2.7.3:
     string-width "^1.0.1"
     strip-ansi "^3.0.1"
     wide-align "^1.1.0"
+
+gaussian@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/gaussian/-/gaussian-1.2.0.tgz#5b081744008c1b0a8eb510da695ed7328fb8913a"
+  integrity sha512-Pz/InFmDZ6VqCbXF+2+O6USIbPUPWhJ7DnqrZKfo9mMHszCd4pBad3WCVa9ruzzrBizYonsv0ZBmuv4rR8NRQg==
 
 get-func-name@^2.0.0:
   version "2.0.0"
