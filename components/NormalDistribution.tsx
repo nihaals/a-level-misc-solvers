@@ -1,8 +1,6 @@
-import { Box, Stack, Text } from "@chakra-ui/layout";
+import { Box, Input, InputGroup, InputLeftAddon, InputRightAddon, Select, Stack, Text } from "@chakra-ui/react";
 import React, { useState } from "react";
 import gaussian from "gaussian";
-import { Input, InputGroup, InputLeftAddon, InputRightAddon } from "@chakra-ui/input";
-import { Select } from "@chakra-ui/select";
 
 type H1Inequality = "<" | "!=" | ">";
 
