@@ -168,7 +168,13 @@ export const NormalDistribution: React.FC<Record<string, never>> = () => {
           <Text display="inline-block">X ~ N({meanDistribution},</Text>
           <Input
             defaultValue="0.89442719"
-            onChange={(event) => setStandardDeviationDistribution(parseFloat(event.target.value))}
+            onChange={(event) => {
+              let value = parseFloat(event.target.value);
+              if (value <= 0) {
+                value = NaN;
+              }
+              setStandardDeviationDistribution(value);
+            }}
             isInvalid={isNaN(standardDeviationDistribution)}
             width={100}
             variant="flushed"
