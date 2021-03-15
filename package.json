@@ -1,6 +1,6 @@
 {
-  "name": "hypothesis-testing-solver",
-  "repository": "https://github.com/nihaals/hypothesis-testing-solver",
+  "name": "a-level-misc-solvers",
+  "repository": "https://github.com/nihaals/a-level-misc-solvers",
   "license": "MIT",
   "private": true,
   "scripts": {
