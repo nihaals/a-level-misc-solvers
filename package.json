@@ -10,7 +10,7 @@
     "build-ci": "next build && next export"
   },
   "dependencies": {
-    "@chakra-ui/react": "^1.3.4",
+    "@chakra-ui/react": "^1.4.1",
     "@emotion/react": "^11.1.5",
     "@emotion/styled": "^11.1.5",
     "framer-motion": "^3.10.0",
