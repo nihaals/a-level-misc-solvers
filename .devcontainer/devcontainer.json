@@ -1,0 +1,7 @@
+{
+  "name": "A Level Misc Solvers",
+  "dockerFile": "Dockerfile",
+  "remoteUser": "node",
+  "postCreateCommand": ["yarn", "install"],
+  "postAttachCommand": ["yarn", "install"]
+}
