@@ -8,12 +8,13 @@ interface OneTailedProps {
   bound: "lower" | "upper";
   probability: number;
   sampleValue: number;
+  sampleSize: number;
 }
 
-const OneTailed: React.FC<OneTailedProps> = ({ bound, probability, sampleValue }) => {
+const OneTailed: React.FC<OneTailedProps> = ({ bound, probability, sampleValue, sampleSize }) => {
   const criticalValue = useNumberAsStringState(
     "19.5",
-    (value) => !Number.isInteger(value) && !value.toString().endsWith(".5")
+    (value) => !(Number.isInteger(value) || value.toString().endsWith(".5")) || value < 0 || value > sampleSize
   );
   const criticalRegion =
     bound === "lower" ? Math.floor(criticalValue.valueNumber) : Math.ceil(criticalValue.valueNumber);
@@ -46,9 +47,7 @@ const OneTailed: React.FC<OneTailedProps> = ({ bound, probability, sampleValue }
   );
 };
 
-type TwoTailedProps = Omit<OneTailedProps, "bound"> & {
-  sampleSize: number;
-};
+type TwoTailedProps = Omit<OneTailedProps, "bound">;
 
 const TwoTailed: React.FC<TwoTailedProps> = ({ sampleSize, probability, sampleValue }) => {
   let multiplied = sampleSize * probability;
@@ -64,7 +63,7 @@ const TwoTailed: React.FC<TwoTailedProps> = ({ sampleSize, probability, sampleVa
         {bound === "lower" ? ">" : "<"}
         {sampleValue} ⟹ {bound} bound
       </Text>
-      <OneTailed bound={bound} probability={probability} sampleValue={sampleValue} />
+      <OneTailed bound={bound} probability={probability} sampleValue={sampleValue} sampleSize={sampleSize} />
     </>
   );
 };
@@ -75,8 +74,11 @@ export const BinomialDistribution: React.FC<Record<string, never>> = () => {
   const testValue = useNumberAsStringState("0.35", (value) => value < 0 || value > 1);
   const [hypothesisInequality, setHypothesisInequality] = useState<AlternativeHypothesisInequality>(">");
   const significanceLevel = useNumberAsStringState("0.05", (value) => value <= 0 || value >= 1);
-  const sampleSize = useNumberAsStringState("40", (value) => !Number.isInteger(value));
-  const sampleValue = useNumberAsStringState("19", (value) => !Number.isInteger(value));
+  const sampleSize = useNumberAsStringState("40", (value) => !Number.isInteger(value) || value <= 0);
+  const sampleValue = useNumberAsStringState(
+    "19",
+    (value) => !Number.isInteger(value) || value > sampleSize.valueNumber || value <= 0
+  );
 
   const actualSignificanceLevel =
     hypothesisInequality === "!=" ? significanceLevel.valueNumber / 2 : significanceLevel.valueNumber;
@@ -136,6 +138,7 @@ export const BinomialDistribution: React.FC<Record<string, never>> = () => {
           bound={hypothesisInequality === "<" ? "lower" : "upper"}
           probability={testValue.valueNumber}
           sampleValue={sampleValue.valueNumber}
+          sampleSize={sampleSize.valueNumber}
         />
       )}
     </>
