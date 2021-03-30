@@ -1,11 +1,12 @@
 import { Box, Button, Stack, useColorMode } from "@chakra-ui/react";
 import Head from "next/head";
 import { useState } from "react";
+import { BinomialDistribution } from "../components/BinomialDistribution";
 import { Distribution, DistributionSelector } from "../components/DistributionSelector";
 import { NormalDistribution } from "../components/NormalDistribution";
 
 export default function HypothesisTesting(): JSX.Element {
-  const [distribution, setDistribution] = useState<Distribution>("normal");
+  const [distribution, setDistribution] = useState<Distribution>("binomial");
   const { colorMode, toggleColorMode } = useColorMode();
 
   return (
@@ -20,7 +21,7 @@ export default function HypothesisTesting(): JSX.Element {
         <Stack direction="column" spacing={2} mt={1}>
           <DistributionSelector onChange={setDistribution} value={distribution}></DistributionSelector>
           <Box borderWidth="1px" borderRadius="md" p={3}>
-            <NormalDistribution />
+            {distribution === "binomial" ? <BinomialDistribution /> : <NormalDistribution />}
           </Box>
         </Stack>
       </Box>
