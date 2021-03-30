@@ -1,31 +1,25 @@
-import { Box, Input, InputGroup, InputLeftAddon, InputRightAddon, Select, Stack, Text } from "@chakra-ui/react";
+import { Box, Stack, Text } from "@chakra-ui/react";
 import React, { useState } from "react";
 import gaussian from "gaussian";
+import { HypothesisTestInput, useNumberAsStringState } from "./HypothesisTestInput";
+import { AlternativeHypothesisInequality, H0, Hypotheses } from "./Hypotheses";
+import { InlineInput } from "./InlineInput";
 
-type H1Inequality = "<" | "!=" | ">";
-
-type TailInequality = "<" | ">";
-
-interface SingleTailedProps {
+interface OneTailedProps {
   sampleMean: number;
   actualSignificanceLevel: number;
   distribution: gaussian.Gaussian;
-  inequality: TailInequality;
+  bound: "lower" | "upper";
 }
 
-export const SingleTailed: React.FC<SingleTailedProps> = ({
-  sampleMean,
-  distribution,
-  actualSignificanceLevel,
-  inequality,
-}) => {
-  const probability = inequality === ">" ? 1 - distribution.cdf(sampleMean) : distribution.cdf(sampleMean);
+export const OneTailed: React.FC<OneTailedProps> = ({ sampleMean, actualSignificanceLevel, distribution, bound }) => {
+  const probability = bound === "upper" ? 1 - distribution.cdf(sampleMean) : distribution.cdf(sampleMean);
 
-  if (inequality === ">") {
+  if (bound === "upper") {
     return (
       <>
         <Text>
-          P(X̅ {inequality} {sampleMean}) = {probability} {probability < actualSignificanceLevel ? "<" : "≥"}{" "}
+          P(X̅ {">"} {sampleMean}) = {probability} {probability < actualSignificanceLevel ? "<" : "≥"}{" "}
           {actualSignificanceLevel}
         </Text>
         <Text>
@@ -38,7 +32,7 @@ export const SingleTailed: React.FC<SingleTailedProps> = ({
     return (
       <>
         <Text>
-          P(X̅ {inequality} {sampleMean}) = {probability} {1 - probability < actualSignificanceLevel ? "<" : "≥"}{" "}
+          P(X̅ {"<"} {sampleMean}) = {probability} {1 - probability < actualSignificanceLevel ? "<" : "≥"}{" "}
           {1 - actualSignificanceLevel} = 1 - {actualSignificanceLevel}
         </Text>
         <Text>
@@ -50,155 +44,135 @@ export const SingleTailed: React.FC<SingleTailedProps> = ({
   }
 };
 
-interface TwoTailedProps {
-  sampleMean: number;
-  meanDistribution: number;
-  actualSignificanceLevel: number;
-  distribution: gaussian.Gaussian;
-}
+type TwoTailedProps = Omit<OneTailedProps, "bound"> & {
+  distributionMean: number;
+};
 
 export const TwoTailed: React.FC<TwoTailedProps> = ({
   sampleMean,
-  meanDistribution,
+  distributionMean,
   actualSignificanceLevel,
   distribution,
 }) => {
   return (
     <>
       <Text>
-        {sampleMean} {sampleMean > meanDistribution ? ">" : "<"} {meanDistribution} ⟹{" "}
-        {sampleMean > meanDistribution ? "Upper" : "Lower"} tail
+        {sampleMean} {sampleMean > distributionMean ? ">" : "<"} {distributionMean} ⟹{" "}
+        {sampleMean > distributionMean ? "Upper" : "Lower"} tail
       </Text>
-      <SingleTailed
+      <OneTailed
         sampleMean={sampleMean}
         actualSignificanceLevel={actualSignificanceLevel}
         distribution={distribution}
-        inequality={sampleMean > meanDistribution ? ">" : "<"}
+        bound={sampleMean > distributionMean ? "upper" : "lower"}
       />
     </>
   );
 };
 
 export const NormalDistribution: React.FC<Record<string, never>> = () => {
-  const [meanDistribution, setMeanDistribution] = useState<number>(10.6);
-  const [standardDeviationDistribution, setStandardDeviationDistribution] = useState<number>(Math.sqrt(0.8));
-  const [sampleSize, setSampleSize] = useState<number>(50);
-  const [sampleMean, setSampleMean] = useState<number>(10.79);
-  const [inequality, setInequality] = useState<H1Inequality>("!=");
-  const [significanceLevel, setSignificanceLevel] = useState<number>(0.1);
+  const testValueName = "μ";
 
-  const distribution = gaussian(meanDistribution, Math.pow(standardDeviationDistribution, 2) / sampleSize);
+  const distributionMean = useNumberAsStringState("65");
+  const [hypothesisInequality, setHypothesisInequality] = useState<AlternativeHypothesisInequality>(">");
+  const distributionStandardDeviation = useNumberAsStringState("10");
+  const sampleSize = useNumberAsStringState("8");
+  const sampleMean = useNumberAsStringState("72");
+  const significanceLevel = useNumberAsStringState("0.05", (value) => value <= 0 || value >= 1);
 
-  let actualSignificanceLevel = significanceLevel;
-  if (inequality === "!=") {
-    actualSignificanceLevel = significanceLevel / 2;
-  }
+  const meanDistribution = gaussian(
+    distributionMean.valueNumber,
+    Math.pow(distributionStandardDeviation.valueNumber, 2) / sampleSize.valueNumber
+  );
+
+  const actualSignificanceLevel =
+    hypothesisInequality === "!=" ? significanceLevel.valueNumber / 2 : significanceLevel.valueNumber;
 
   return (
     <>
       <Stack direction="column" mb={5}>
-        <InputGroup>
-          <InputLeftAddon>Significance level</InputLeftAddon>
-          <Input
-            defaultValue="0.1"
-            onChange={(event) => setSignificanceLevel(parseFloat(event.target.value))}
-            isInvalid={isNaN(significanceLevel)}
-            width={75}
-          />
-          <InputRightAddon>{significanceLevel * 100}%</InputRightAddon>
-        </InputGroup>
-        <InputGroup>
-          <InputLeftAddon>Sample size</InputLeftAddon>
-          <Input
-            defaultValue="50"
-            onChange={(event) => setSampleSize(parseInt(event.target.value))}
-            isInvalid={isNaN(sampleSize)}
-            width={100}
-          />
-          <InputRightAddon>{sampleSize}</InputRightAddon>
-        </InputGroup>
-        <InputGroup>
-          <InputLeftAddon>Sample mean</InputLeftAddon>
-          <Input
-            defaultValue="10.79"
-            onChange={(event) => setSampleMean(parseFloat(event.target.value))}
-            isInvalid={isNaN(sampleMean)}
-            width={100}
-          />
-          <InputRightAddon>{sampleMean}</InputRightAddon>
-        </InputGroup>
-      </Stack>
-      <Box>
-        <Text display="inline">H₀: μ =</Text>
-        <Input
-          defaultValue="10.6"
-          onChange={(event) => setMeanDistribution(parseFloat(event.target.value))}
-          isInvalid={isNaN(meanDistribution)}
-          width={100}
-          variant="flushed"
-          ml={1}
+        <HypothesisTestInput
+          name="Mean of distribution"
+          value={distributionMean.value}
+          onChange={distributionMean.setValue}
+          isInvalid={distributionMean.isInvalid}
+          processedValue={`${testValueName}=${distributionMean.valueNumber}`}
         />
-      </Box>
+        <HypothesisTestInput
+          name="Standard deviation of distribution"
+          value={distributionStandardDeviation.value}
+          onChange={distributionStandardDeviation.setValue}
+          isInvalid={distributionStandardDeviation.isInvalid}
+          processedValue={`σ=${distributionStandardDeviation.valueNumber}`}
+        />
+        <HypothesisTestInput
+          name="Sample size"
+          value={sampleSize.value}
+          onChange={sampleSize.setValue}
+          isInvalid={sampleSize.isInvalid}
+        />
+        <HypothesisTestInput
+          name="Sample mean"
+          value={sampleMean.value}
+          onChange={sampleMean.setValue}
+          isInvalid={sampleMean.isInvalid}
+        />
+        <HypothesisTestInput
+          name="Significance level"
+          value={significanceLevel.value}
+          onChange={significanceLevel.setValue}
+          isInvalid={significanceLevel.isInvalid}
+          processedValue={`α=${significanceLevel.valueNumber * 100}%`}
+        />
+      </Stack>
       <Box mb={5}>
-        <Text display="inline">H₁: μ</Text>
-        <Select
-          onChange={(event) => {
-            const value = event.target.value;
-            if (value === "<" || value === "!=" || value === ">") {
-              setInequality(value);
-            }
-          }}
-          value={inequality}
-          width={20}
-          display="inline-block"
-          mx={1}
-          variant="flushed"
-        >
-          <option>{"<"}</option>
-          <option value="!=">{"≠"}</option>
-          <option>{">"}</option>
-        </Select>
-        <Text display="inline">
-          {meanDistribution} ⟹ SL: {actualSignificanceLevel * 100}%
-        </Text>
+        <Hypotheses
+          testValueName={testValueName}
+          value={distributionMean.value}
+          onValueChange={distributionMean.setValue}
+          valueIsInvalid={distributionMean.isInvalid}
+          inequality={hypothesisInequality}
+          onInequalityChange={setHypothesisInequality}
+          actualSignificanceLevel={actualSignificanceLevel}
+        ></Hypotheses>
       </Box>
       <Stack direction="row" mb={5}>
-        <Text mt="7px">If H₀,</Text>
-        <Box>
-          <Text display="inline-block">X ~ N({meanDistribution},</Text>
-          <Input
-            defaultValue="0.89442719"
-            onChange={(event) => {
-              let value = parseFloat(event.target.value);
-              if (value <= 0) {
-                value = NaN;
-              }
-              setStandardDeviationDistribution(value);
-            }}
-            isInvalid={isNaN(standardDeviationDistribution)}
-            width={100}
-            variant="flushed"
-            mx={1}
-          />
-          <Text display="inline-block">²) and</Text>
+        <Text mt="7px">If {H0},</Text>
+        <Stack direction="column">
+          <Box>
+            <Text display="inline-block">X ~ N(</Text>
+            <InlineInput
+              value={distributionMean.value}
+              onChange={distributionMean.setValue}
+              isInvalid={distributionMean.isInvalid}
+            />
+            <Text display="inline-block">,</Text>
+            <InlineInput
+              value={distributionStandardDeviation.value}
+              onChange={distributionStandardDeviation.setValue}
+              isInvalid={distributionStandardDeviation.isInvalid}
+            />
+            <Text display="inline-block">²) and</Text>
+          </Box>
           <Text>
-            X̅ ~ N({meanDistribution}, ({standardDeviationDistribution}/√{sampleSize})²)
+            X̅ ~ N({distributionMean.valueNumber}, ({distributionStandardDeviation.valueNumber}/√{sampleSize.valueNumber}
+            )²)
           </Text>
-        </Box>
+        </Stack>
       </Stack>
-      {inequality === "!=" ? (
+      {hypothesisInequality === "!=" ? (
         <TwoTailed
-          sampleMean={sampleMean}
-          meanDistribution={meanDistribution}
+          sampleMean={sampleMean.valueNumber}
           actualSignificanceLevel={actualSignificanceLevel}
-          distribution={distribution}
+          distribution={meanDistribution}
+          distributionMean={distributionMean.valueNumber}
         />
       ) : (
-        <SingleTailed
-          sampleMean={sampleMean}
+        <OneTailed
+          sampleMean={sampleMean.valueNumber}
           actualSignificanceLevel={actualSignificanceLevel}
-          distribution={distribution}
-          inequality={inequality}
+          distribution={meanDistribution}
+          bound={hypothesisInequality === "<" ? "lower" : "upper"}
         />
       )}
     </>
