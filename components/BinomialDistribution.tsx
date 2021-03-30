@@ -6,24 +6,24 @@ import { InlineInput } from "./InlineInput";
 
 interface OneTailedProps {
   bound: "lower" | "upper";
-  probability: number;
+  actualSignificanceLevel: number;
   sampleValue: number;
   sampleSize: number;
 }
 
-const OneTailed: React.FC<OneTailedProps> = ({ bound, probability, sampleValue, sampleSize }) => {
+const OneTailed: React.FC<OneTailedProps> = ({ bound, actualSignificanceLevel, sampleValue, sampleSize }) => {
   const criticalValue = useNumberAsStringState(
-    "19.5",
+    "18.5",
     (value) => !(Number.isInteger(value) || value.toString().endsWith(".5")) || value < 0 || value > sampleSize
   );
   const criticalRegion =
-    bound === "lower" ? Math.floor(criticalValue.valueNumber) : Math.ceil(criticalValue.valueNumber);
+    bound === "lower" ? Math.floor(criticalValue.valueNumber) : Math.ceil(criticalValue.valueNumber) + 1;
   const inCriticalRegion = bound === "lower" ? sampleValue <= criticalRegion : sampleValue >= criticalRegion;
   return (
     <>
       <Box>
         <Text display="inline-block">
-          P(X{"≤"}x)={bound === "upper" ? 1 - probability : probability}, x=
+          P(X{"≤"}x)={bound === "upper" ? 1 - actualSignificanceLevel : actualSignificanceLevel}, x=
         </Text>
         <InlineInput
           value={criticalValue.value}
@@ -47,23 +47,30 @@ const OneTailed: React.FC<OneTailedProps> = ({ bound, probability, sampleValue, 
   );
 };
 
-type TwoTailedProps = Omit<OneTailedProps, "bound">;
+type TwoTailedProps = Omit<OneTailedProps, "bound"> & {
+  testValue: number;
+};
 
-const TwoTailed: React.FC<TwoTailedProps> = ({ sampleSize, probability, sampleValue }) => {
-  let multiplied = sampleSize * probability;
+const TwoTailed: React.FC<TwoTailedProps> = ({ testValue, actualSignificanceLevel, sampleValue, sampleSize }) => {
+  let multiplied = sampleSize * testValue;
   if (multiplied === sampleSize) multiplied = NaN;
   const bound = multiplied > sampleValue ? "lower" : "upper";
   return (
     <>
       <Text>
-        {sampleSize} ⋅ {probability} = {multiplied}
+        {sampleSize} ⋅ {testValue} = {multiplied}
       </Text>
       <Text>
         {multiplied}
         {bound === "lower" ? ">" : "<"}
         {sampleValue} ⟹ {bound} bound
       </Text>
-      <OneTailed bound={bound} probability={probability} sampleValue={sampleValue} sampleSize={sampleSize} />
+      <OneTailed
+        bound={bound}
+        actualSignificanceLevel={actualSignificanceLevel}
+        sampleValue={sampleValue}
+        sampleSize={sampleSize}
+      />
     </>
   );
 };
@@ -133,14 +140,15 @@ export const BinomialDistribution: React.FC<Record<string, never>> = () => {
       </Box>
       {hypothesisInequality === "!=" ? (
         <TwoTailed
-          sampleSize={sampleSize.valueNumber}
-          probability={testValue.valueNumber}
+          testValue={testValue.valueNumber}
+          actualSignificanceLevel={actualSignificanceLevel}
           sampleValue={sampleValue.valueNumber}
+          sampleSize={sampleSize.valueNumber}
         />
       ) : (
         <OneTailed
           bound={hypothesisInequality === "<" ? "lower" : "upper"}
-          probability={testValue.valueNumber}
+          actualSignificanceLevel={actualSignificanceLevel}
           sampleValue={sampleValue.valueNumber}
           sampleSize={sampleSize.valueNumber}
         />
