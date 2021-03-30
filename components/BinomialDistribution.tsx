@@ -124,9 +124,13 @@ export const BinomialDistribution: React.FC<Record<string, never>> = () => {
           actualSignificanceLevel={actualSignificanceLevel}
         ></Hypotheses>
       </Box>
-      <Text>
-        X~B({sampleSize.valueNumber}, {testValue.valueNumber})
-      </Text>
+      <Box>
+        <Text display="inline-block">X~B(</Text>
+        <InlineInput value={sampleSize.value} onChange={sampleSize.setValue} isInvalid={sampleSize.isInvalid} />
+        <Text display="inline-block">, </Text>
+        <InlineInput value={testValue.value} onChange={testValue.setValue} isInvalid={testValue.isInvalid} />
+        <Text display="inline-block">)</Text>
+      </Box>
       {hypothesisInequality === "!=" ? (
         <TwoTailed
           sampleSize={sampleSize.valueNumber}
