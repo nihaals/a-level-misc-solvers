@@ -75,7 +75,7 @@ export const NormalDistribution: React.FC<Record<string, never>> = () => {
 
   const distributionMean = useNumberAsStringState("65");
   const [hypothesisInequality, setHypothesisInequality] = useState<AlternativeHypothesisInequality>(">");
-  const distributionStandardDeviation = useNumberAsStringState("10");
+  const distributionStandardDeviation = useNumberAsStringState("10", (value) => value <= 0);
   const sampleSize = useNumberAsStringState("8");
   const sampleMean = useNumberAsStringState("72");
   const significanceLevel = useNumberAsStringState("0.05", (value) => value <= 0 || value >= 1);
