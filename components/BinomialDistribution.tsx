@@ -96,7 +96,7 @@ export const BinomialDistribution: React.FC<Record<string, never>> = () => {
           value={significanceLevel.value}
           onChange={significanceLevel.setValue}
           isInvalid={significanceLevel.isInvalid}
-          processedValue={`${significanceLevel.valueNumber * 100}%`}
+          processedValue={`α=${significanceLevel.valueNumber * 100}%`}
         />
         <HypothesisTestInput
           name="Sample size"
