@@ -37,7 +37,7 @@ export const useNumberAsStringState = (
   isInvalid?: (value: number) => boolean
 ): useNumberAsStringStateReturn => {
   const [state, setState] = useState<string>(initialState);
-  const stateNumber = Number(state);
+  const stateNumber = state === "" ? NaN : Number(state);
   let stateIsInvalid = isNaN(stateNumber);
   if (!stateIsInvalid && isInvalid) {
     stateIsInvalid = isInvalid(stateNumber);
