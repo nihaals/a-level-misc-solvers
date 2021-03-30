@@ -182,7 +182,7 @@ export const NormalDistribution: React.FC<Record<string, never>> = () => {
           />
           <Text display="inline-block">²) and</Text>
           <Text>
-            X̅ ~ N({meanDistribution}, ({Math.pow(standardDeviationDistribution, 2)}/√{sampleSize})²)
+            X̅ ~ N({meanDistribution}, ({standardDeviationDistribution}/√{sampleSize})²)
           </Text>
         </Box>
       </Stack>
