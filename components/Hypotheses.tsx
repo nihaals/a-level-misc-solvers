@@ -1,5 +1,6 @@
-import { Box, Input, Select, Text } from "@chakra-ui/react";
+import { Box, Select, Text } from "@chakra-ui/react";
 import React from "react";
+import { InlineInput } from "./InlineInput";
 
 export type AlternativeHypothesisInequality = "<" | "!=" | ">";
 
@@ -12,21 +13,6 @@ interface HypothesesProps {
   onInequalityChange(inequality: AlternativeHypothesisInequality): void;
   actualSignificanceLevel: number;
 }
-
-type ValueInputProps = Pick<HypothesesProps, "value" | "onValueChange" | "valueIsInvalid">;
-
-const ValueInput: React.FC<ValueInputProps> = ({ value, onValueChange, valueIsInvalid }) => {
-  return (
-    <Input
-      value={value}
-      onChange={(event) => onValueChange(event.target.value)}
-      isInvalid={valueIsInvalid}
-      width={100}
-      variant="flushed"
-      ml={1}
-    />
-  );
-};
 
 export const H0 = "H₀";
 export const H1 = "H₁";
@@ -46,7 +32,7 @@ export const Hypotheses: React.FC<HypothesesProps> = ({
         <Text display="inline">
           {H0}: {testValueName} =
         </Text>
-        <ValueInput value={value} onValueChange={onValueChange} valueIsInvalid={valueIsInvalid} />
+        <InlineInput value={value} onChange={onValueChange} isInvalid={valueIsInvalid} />
       </Box>
       <Box>
         <Text display="inline">
@@ -69,7 +55,7 @@ export const Hypotheses: React.FC<HypothesesProps> = ({
           <option value="!=">{"≠"}</option>
           <option>{">"}</option>
         </Select>
-        <ValueInput value={value} onValueChange={onValueChange} valueIsInvalid={valueIsInvalid} />
+        <InlineInput value={value} onChange={onValueChange} isInvalid={valueIsInvalid} />
         <Text display="inline">⟹ SL: {actualSignificanceLevel * 100}%</Text>
       </Box>
     </>

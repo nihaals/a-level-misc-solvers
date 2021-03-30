@@ -2,52 +2,34 @@ import { Box, Stack, Text } from "@chakra-ui/react";
 import React, { useState } from "react";
 import { AlternativeHypothesisInequality, H0, Hypotheses } from "./Hypotheses";
 import { HypothesisTestInput, useNumberAsStringState } from "./HypothesisTestInput";
-
-/**
- * Finds the value of P(X<=value) for which X~B(sampleSize, probability).
- *
- * Returns NaN if invalid input is given or value is not an expected value.
- */
-const binomialCumulativeDistribution = (sampleSize: number, probability: number, value: number): number => {
-  if (probability >= 1 || probability <= 0 || value > sampleSize || value < 0 || !Number.isInteger(value)) {
-    return NaN;
-  }
-  if (value === sampleSize) return 1;
-  if (value === 0) return 0;
-
-  return NaN;
-};
-
-/**
- * Gets the value of x for which X~B(sampleSize, probability), P(X<=x) = valueProbability
- *
- * If x is in-between two consecutive integers, the mean of the integers is returned.
- * For example, if x is in-between 19 and 20, 19.5 is returned.
- *
- * Returns NaN if invalid input is given.
- */
-const getCriticalRegion = (sampleSize: number, probability: number, valueProbability: number): number => {
-  if (probability >= 1 || probability <= 0 || valueProbability >= 1 || valueProbability <= 0) {
-    return NaN;
-  }
-
-  return binomialCumulativeDistribution(sampleSize, probability, NaN);
-};
+import { InlineInput } from "./InlineInput";
 
 interface OneTailedProps {
   bound: "lower" | "upper";
-  sampleSize: number;
   probability: number;
   sampleValue: number;
 }
 
-const OneTailed: React.FC<OneTailedProps> = ({ bound, sampleSize, probability, sampleValue }) => {
-  let criticalRegion = getCriticalRegion(sampleSize, probability, bound === "upper" ? 1 - probability : probability);
-  if (bound === "lower") criticalRegion = Math.floor(criticalRegion);
-  else criticalRegion = Math.ceil(criticalRegion);
-  const inCriticalRegion = bound === "lower" ? sampleSize >= criticalRegion : sampleSize <= criticalRegion;
+const OneTailed: React.FC<OneTailedProps> = ({ bound, probability, sampleValue }) => {
+  const criticalValue = useNumberAsStringState(
+    "19.5",
+    (value) => !Number.isInteger(value) && !value.toString().endsWith(".5")
+  );
+  const criticalRegion =
+    bound === "lower" ? Math.floor(criticalValue.valueNumber) : Math.ceil(criticalValue.valueNumber);
+  const inCriticalRegion = bound === "lower" ? sampleValue <= criticalRegion : sampleValue >= criticalRegion;
   return (
     <>
+      <Box>
+        <Text display="inline-block">
+          P(X{"≤"}x)={bound === "upper" ? 1 - probability : probability}, x=
+        </Text>
+        <InlineInput
+          value={criticalValue.value}
+          onChange={criticalValue.setValue}
+          isInvalid={criticalValue.isInvalid}
+        />
+      </Box>
       <Text>
         CR: X{bound === "lower" ? "≤" : "≥"}
         {criticalRegion}
@@ -64,7 +46,11 @@ const OneTailed: React.FC<OneTailedProps> = ({ bound, sampleSize, probability, s
   );
 };
 
-const TwoTailed: React.FC<Omit<OneTailedProps, "bound">> = ({ sampleSize, probability, sampleValue }) => {
+type TwoTailedProps = Omit<OneTailedProps, "bound"> & {
+  sampleSize: number;
+};
+
+const TwoTailed: React.FC<TwoTailedProps> = ({ sampleSize, probability, sampleValue }) => {
   let multiplied = sampleSize * probability;
   if (multiplied === sampleSize) multiplied = NaN;
   const bound = multiplied > sampleValue ? "lower" : "upper";
@@ -78,7 +64,7 @@ const TwoTailed: React.FC<Omit<OneTailedProps, "bound">> = ({ sampleSize, probab
         {bound === "lower" ? ">" : "<"}
         {sampleValue} ⟹ {bound} bound
       </Text>
-      <OneTailed bound={bound} sampleSize={sampleSize} probability={probability} sampleValue={sampleValue} />
+      <OneTailed bound={bound} probability={probability} sampleValue={sampleValue} />
     </>
   );
 };
@@ -148,7 +134,6 @@ export const BinomialDistribution: React.FC<Record<string, never>> = () => {
       ) : (
         <OneTailed
           bound={hypothesisInequality === "<" ? "lower" : "upper"}
-          sampleSize={sampleSize.valueNumber}
           probability={testValue.valueNumber}
           sampleValue={sampleValue.valueNumber}
         />
