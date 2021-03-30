@@ -12,7 +12,7 @@ const Home = (): JSX.Element => {
         <UnorderedList>
           <ListItem>
             <NextLink href="/hypothesis-testing">
-              <Link color="teal.500">Hypothesis testing</Link>
+              <Link>Hypothesis testing</Link>
             </NextLink>
           </ListItem>
         </UnorderedList>
