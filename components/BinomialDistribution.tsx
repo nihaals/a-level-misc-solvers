@@ -1,18 +1,9 @@
-import { Box, Stack, Text } from "@chakra-ui/react";
-import React, { useState } from "react";
+import { Box, Skeleton, Stack, Text } from "@chakra-ui/react";
+import React, { useEffect, useRef, useState } from "react";
 import { AlternativeHypothesisInequality, H0, Hypotheses } from "./Hypotheses";
 import { HypothesisTestInput, useNumberAsStringState } from "./HypothesisTestInput";
 import { InlineInput } from "./InlineInput";
-import { jStat } from "jstat";
-
-const getCriticalValue = (sampleSize: number, testValue: number, probability: number): number => {
-  for (let i = 1; i <= sampleSize; i++) {
-    const current: number = jStat.binomial.cdf(i, sampleSize, testValue);
-    if (current > probability) return i - 0.5;
-    if (current === probability) return i;
-  }
-  return NaN;
-};
+import { getCriticalValue } from "../workers/binomial.worker";
 
 interface OneTailedProps {
   bound: "lower" | "upper";
@@ -29,11 +20,36 @@ const OneTailed: React.FC<OneTailedProps> = ({
   sampleSize,
   testValue,
 }) => {
-  const criticalValue = getCriticalValue(
-    sampleSize,
-    testValue,
-    bound === "lower" ? actualSignificanceLevel : 1 - actualSignificanceLevel
-  );
+  const [criticalValue, setCriticalValue] = useState<number | null>(null);
+  const workerRef = useRef<Worker>();
+  useEffect(() => {
+    workerRef.current = new Worker(new URL("../workers/binomial.worker", import.meta.url));
+    workerRef.current.onmessage = (event) => {
+      setCriticalValue(event.data as ReturnType<typeof getCriticalValue>);
+    };
+    const getCriticalValueArguments: Parameters<typeof getCriticalValue> = [
+      sampleSize,
+      testValue,
+      bound === "lower" ? actualSignificanceLevel : 1 - actualSignificanceLevel,
+    ];
+    workerRef.current.postMessage(getCriticalValueArguments);
+
+    return () => {
+      workerRef.current?.terminate();
+      setCriticalValue(null);
+    };
+  }, [sampleSize, testValue, bound, actualSignificanceLevel]);
+
+  if (criticalValue === null) {
+    return (
+      <Stack>
+        <Skeleton height="1em" />
+        <Skeleton height="1em" />
+        <Skeleton height="1em" />
+      </Stack>
+    );
+  }
+
   const criticalRegion = bound === "lower" ? Math.floor(criticalValue) : Math.ceil(criticalValue) + 1;
   const inCriticalRegion = bound === "lower" ? sampleValue <= criticalRegion : sampleValue >= criticalRegion;
   return (
@@ -87,7 +103,7 @@ export const BinomialDistribution: React.FC<Record<string, never>> = () => {
   const testValue = useNumberAsStringState("0.35", (value) => value < 0 || value > 1);
   const [hypothesisInequality, setHypothesisInequality] = useState<AlternativeHypothesisInequality>(">");
   const significanceLevel = useNumberAsStringState("0.05", (value) => value <= 0 || value >= 1);
-  const sampleSize = useNumberAsStringState("40", (value) => !Number.isInteger(value) || value <= 0 || value > 100000);
+  const sampleSize = useNumberAsStringState("40", (value) => !Number.isInteger(value) || value <= 0);
   const sampleValue = useNumberAsStringState(
     "19",
     (value) => !Number.isInteger(value) || value > sampleSize.valueNumber || value <= 0
@@ -137,7 +153,7 @@ export const BinomialDistribution: React.FC<Record<string, never>> = () => {
           actualSignificanceLevel={actualSignificanceLevel}
         ></Hypotheses>
       </Box>
-      <Box>
+      <Box mb={3}>
         <Text display="inline-block">X~B(</Text>
         <InlineInput value={sampleSize.value} onChange={sampleSize.setValue} isInvalid={sampleSize.isInvalid} />
         <Text display="inline-block">, </Text>
