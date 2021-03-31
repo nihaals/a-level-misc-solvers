@@ -87,7 +87,7 @@ export const BinomialDistribution: React.FC<Record<string, never>> = () => {
   const testValue = useNumberAsStringState("0.35", (value) => value < 0 || value > 1);
   const [hypothesisInequality, setHypothesisInequality] = useState<AlternativeHypothesisInequality>(">");
   const significanceLevel = useNumberAsStringState("0.05", (value) => value <= 0 || value >= 1);
-  const sampleSize = useNumberAsStringState("40", (value) => !Number.isInteger(value) || value <= 0);
+  const sampleSize = useNumberAsStringState("40", (value) => !Number.isInteger(value) || value <= 0 || value > 100000);
   const sampleValue = useNumberAsStringState(
     "19",
     (value) => !Number.isInteger(value) || value > sampleSize.valueNumber || value <= 0
