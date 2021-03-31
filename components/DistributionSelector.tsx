@@ -1,7 +1,7 @@
 import { Radio, RadioGroup, Stack } from "@chakra-ui/react";
 import React from "react";
 
-export type Distribution = "binomial" | "normal";
+export type Distribution = "binomial" | "normal" | "correlation";
 
 interface DistributionSelectorProps {
   onChange(distributions: Distribution): void;
@@ -14,9 +14,7 @@ export const DistributionSelector: React.FC<DistributionSelectorProps> = ({ onCh
       <Stack direction="row">
         <Radio value="binomial">Binomial</Radio>
         <Radio value="normal">Normal</Radio>
-        <Radio value="correlation" isDisabled={true}>
-          Pearson correlation coefficient
-        </Radio>
+        <Radio value="correlation">Pearson correlation coefficient</Radio>
       </Stack>
     </RadioGroup>
   );

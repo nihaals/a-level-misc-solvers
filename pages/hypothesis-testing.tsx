@@ -4,6 +4,7 @@ import { useState } from "react";
 import { BinomialDistribution } from "../components/BinomialDistribution";
 import { Distribution, DistributionSelector } from "../components/DistributionSelector";
 import { NormalDistribution } from "../components/NormalDistribution";
+import { Correlation } from "../components/Correlation";
 
 export default function HypothesisTesting(): JSX.Element {
   const [distribution, setDistribution] = useState<Distribution>("binomial");
@@ -21,7 +22,13 @@ export default function HypothesisTesting(): JSX.Element {
         <Stack direction="column" spacing={2} mt={1}>
           <DistributionSelector onChange={setDistribution} value={distribution}></DistributionSelector>
           <Box borderWidth="1px" borderRadius="md" p={3}>
-            {distribution === "binomial" ? <BinomialDistribution /> : <NormalDistribution />}
+            {distribution === "binomial" ? (
+              <BinomialDistribution />
+            ) : distribution === "normal" ? (
+              <NormalDistribution />
+            ) : (
+              <Correlation />
+            )}
           </Box>
         </Stack>
       </Box>

@@ -2522,6 +2522,10 @@ json5@^1.0.1:
   dependencies:
     minimist "^1.2.0"
 
+"jstat@https://github.com/brigalabs/jstat.git#typescript-types":
+  version "1.9.4"
+  resolved "https://github.com/brigalabs/jstat.git#378f5578ff2a81c160b9241d27fcbcaf1d97e078"
+
 "jsx-ast-utils@^2.4.1 || ^3.0.0", jsx-ast-utils@^3.1.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/jsx-ast-utils/-/jsx-ast-utils-3.2.0.tgz#41108d2cec408c3453c1bbe8a4aae9e1e2bd8f82"
