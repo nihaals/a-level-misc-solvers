@@ -3,34 +3,41 @@ import React, { useState } from "react";
 import { AlternativeHypothesisInequality, H0, Hypotheses } from "./Hypotheses";
 import { HypothesisTestInput, useNumberAsStringState } from "./HypothesisTestInput";
 import { InlineInput } from "./InlineInput";
+import { jStat } from "jstat";
+
+const getCriticalValue = (sampleSize: number, testValue: number, probability: number): number => {
+  for (let i = 1; i <= sampleSize; i++) {
+    const current: number = jStat.binomial.cdf(i, sampleSize, testValue);
+    if (current > probability) return i - 0.5;
+    if (current === probability) return i;
+  }
+  return NaN;
+};
 
 interface OneTailedProps {
   bound: "lower" | "upper";
   actualSignificanceLevel: number;
   sampleValue: number;
   sampleSize: number;
+  testValue: number;
 }
 
-const OneTailed: React.FC<OneTailedProps> = ({ bound, actualSignificanceLevel, sampleValue, sampleSize }) => {
-  const criticalValue = useNumberAsStringState(
-    "18.5",
-    (value) => !(Number.isInteger(value) || value.toString().endsWith(".5")) || value < 0 || value > sampleSize
+const OneTailed: React.FC<OneTailedProps> = ({
+  bound,
+  actualSignificanceLevel,
+  sampleValue,
+  sampleSize,
+  testValue,
+}) => {
+  const criticalValue = getCriticalValue(
+    sampleSize,
+    testValue,
+    bound === "lower" ? actualSignificanceLevel : 1 - actualSignificanceLevel
   );
-  const criticalRegion =
-    bound === "lower" ? Math.floor(criticalValue.valueNumber) : Math.ceil(criticalValue.valueNumber) + 1;
+  const criticalRegion = bound === "lower" ? Math.floor(criticalValue) : Math.ceil(criticalValue) + 1;
   const inCriticalRegion = bound === "lower" ? sampleValue <= criticalRegion : sampleValue >= criticalRegion;
   return (
     <>
-      <Box>
-        <Text display="inline-block">
-          P(X{"≤"}x)={bound === "upper" ? 1 - actualSignificanceLevel : actualSignificanceLevel}, x=
-        </Text>
-        <InlineInput
-          value={criticalValue.value}
-          onChange={criticalValue.setValue}
-          isInvalid={criticalValue.isInvalid}
-        />
-      </Box>
       <Text>
         CR: X{bound === "lower" ? "≤" : "≥"}
         {criticalRegion}
@@ -47,11 +54,9 @@ const OneTailed: React.FC<OneTailedProps> = ({ bound, actualSignificanceLevel, s
   );
 };
 
-type TwoTailedProps = Omit<OneTailedProps, "bound"> & {
-  testValue: number;
-};
+type TwoTailedProps = Omit<OneTailedProps, "bound">;
 
-const TwoTailed: React.FC<TwoTailedProps> = ({ testValue, actualSignificanceLevel, sampleValue, sampleSize }) => {
+const TwoTailed: React.FC<TwoTailedProps> = ({ actualSignificanceLevel, sampleValue, sampleSize, testValue }) => {
   let multiplied = sampleSize * testValue;
   if (multiplied === sampleSize) multiplied = NaN;
   const bound = multiplied > sampleValue ? "lower" : "upper";
@@ -70,6 +75,7 @@ const TwoTailed: React.FC<TwoTailedProps> = ({ testValue, actualSignificanceLeve
         actualSignificanceLevel={actualSignificanceLevel}
         sampleValue={sampleValue}
         sampleSize={sampleSize}
+        testValue={testValue}
       />
     </>
   );
@@ -140,10 +146,10 @@ export const BinomialDistribution: React.FC<Record<string, never>> = () => {
       </Box>
       {hypothesisInequality === "!=" ? (
         <TwoTailed
-          testValue={testValue.valueNumber}
           actualSignificanceLevel={actualSignificanceLevel}
           sampleValue={sampleValue.valueNumber}
           sampleSize={sampleSize.valueNumber}
+          testValue={testValue.valueNumber}
         />
       ) : (
         <OneTailed
@@ -151,6 +157,7 @@ export const BinomialDistribution: React.FC<Record<string, never>> = () => {
           actualSignificanceLevel={actualSignificanceLevel}
           sampleValue={sampleValue.valueNumber}
           sampleSize={sampleSize.valueNumber}
+          testValue={testValue.valueNumber}
         />
       )}
     </>
