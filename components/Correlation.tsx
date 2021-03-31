@@ -5,7 +5,6 @@ import { HypothesisTestInput, useNumberAsStringState } from "./HypothesisTestInp
 import { jStat } from "jstat";
 
 const getCriticalValue = (sampleSize: number, significanceLevel: number): number => {
-  // T.INV(1-ALPHA/2,SAMPLE-2)/SQRT(T.INV(1-ALPHA/2,SAMPLE-2)^2+SAMPLE-2)
   const foo = Math.pow(jStat.studentt.inv(significanceLevel, sampleSize - 2), 2);
   return Math.sqrt(foo / (foo + sampleSize - 2));
 };
