@@ -43,8 +43,8 @@ export default function HypothesisTesting(): JSX.Element {
           isLazy
           index={tabIndex}
           onChange={(index) => {
-            router.push("/hypothesis-testing", { query: { test: tests[index] } });
             setTabIndex(index);
+            router.push("/hypothesis-testing", { query: index === 0 ? {} : { test: tests[index] } });
           }}
         >
           <TabList mt={2} position="sticky" top={0} backgroundColor={bg} zIndex={1}>
