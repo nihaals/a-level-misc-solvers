@@ -22,7 +22,12 @@ export const Correlation: React.FC<Record<string, never>> = () => {
 
   let criticalValue = getCriticalValue(sampleSize.valueNumber, actualSignificanceLevel);
   if (criticalValue === samplePMCC.valueNumber) criticalValue = NaN;
-  const rejectH0 = Math.abs(samplePMCC.valueNumber) > criticalValue;
+  const rejectH0 =
+    hypothesisInequality === "!="
+      ? Math.abs(samplePMCC.valueNumber) > criticalValue
+      : hypothesisInequality === "<"
+      ? samplePMCC.valueNumber < -1 * criticalValue
+      : samplePMCC.valueNumber > criticalValue;
 
   return (
     <>
@@ -84,7 +89,9 @@ export const Correlation: React.FC<Record<string, never>> = () => {
         {significanceLevel.valueNumber * 100}% level is {criticalValue}
       </Text>
       <Text>
-        {samplePMCC.valueNumber} {rejectH0 ? ">" : "<"} {criticalValue}
+        {hypothesisInequality === "!=" ? Math.abs(samplePMCC.valueNumber) : samplePMCC.valueNumber}{" "}
+        {hypothesisInequality === "<" ? (rejectH0 ? "<" : ">") : rejectH0 ? ">" : "<"}{" "}
+        {hypothesisInequality === "<" ? -criticalValue : criticalValue}
       </Text>
       <Text>
         {rejectH0 ? "Sufficient" : "Insufficient"} evidence to reject {H0} - this suggests there{" "}
