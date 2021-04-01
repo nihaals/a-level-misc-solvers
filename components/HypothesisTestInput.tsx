@@ -19,7 +19,13 @@ export const HypothesisTestInput: React.FC<HypothesisTestInputProps> = ({
   return (
     <InputGroup>
       <InputLeftAddon>{name}</InputLeftAddon>
-      <Input value={value} onChange={(event) => onChange(event.target.value)} isInvalid={isInvalid} width={75} />
+      <Input
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        isInvalid={isInvalid}
+        minWidth={"7ch"}
+        maxWidth={value.length + 5 + "ch"}
+      />
       {processedValue && <InputRightAddon>{processedValue}</InputRightAddon>}
     </InputGroup>
   );
