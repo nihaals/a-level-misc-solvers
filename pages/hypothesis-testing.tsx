@@ -1,14 +1,34 @@
-import { Box, Button, Stack, useColorMode } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
+  useColorMode,
+  useColorModeValue,
+} from "@chakra-ui/react";
 import Head from "next/head";
-import { useState } from "react";
+import { useRouter } from "next/router";
 import { BinomialDistribution } from "../components/BinomialDistribution";
-import { Distribution, DistributionSelector } from "../components/DistributionSelector";
 import { NormalDistribution } from "../components/NormalDistribution";
 import { Correlation } from "../components/Correlation";
+import { useEffect, useState } from "react";
+
+const tests = ["binomial", "normal", "correlation"];
 
 export default function HypothesisTesting(): JSX.Element {
-  const [distribution, setDistribution] = useState<Distribution>("binomial");
   const { colorMode, toggleColorMode } = useColorMode();
+  const bg = useColorModeValue("white", "gray.800");
+  const router = useRouter();
+  const [tabIndex, setTabIndex] = useState(0);
+  useEffect(() => {
+    if (typeof router.query.test === "string") {
+      const index = tests.indexOf(router.query.test);
+      if (index !== -1) setTabIndex(index);
+    }
+  }, [router.query.test]);
 
   return (
     <>
@@ -19,18 +39,31 @@ export default function HypothesisTesting(): JSX.Element {
       </Head>
       <Box p={2}>
         <Button onClick={() => toggleColorMode()}>Switch to {colorMode === "light" ? "dark" : "light"} mode</Button>
-        <Stack direction="column" spacing={2} mt={1}>
-          <DistributionSelector onChange={setDistribution} value={distribution}></DistributionSelector>
-          <Box borderWidth="1px" borderRadius="md" p={3}>
-            {distribution === "binomial" ? (
+        <Tabs
+          isLazy
+          index={tabIndex}
+          onChange={(index) => {
+            router.push("/hypothesis-testing", { query: { test: tests[index] } });
+            setTabIndex(index);
+          }}
+        >
+          <TabList mt={2} position="sticky" top={0} backgroundColor={bg} zIndex={1}>
+            <Tab>Binomial</Tab>
+            <Tab>Normal</Tab>
+            <Tab>Correlation</Tab>
+          </TabList>
+          <TabPanels>
+            <TabPanel>
               <BinomialDistribution />
-            ) : distribution === "normal" ? (
+            </TabPanel>
+            <TabPanel>
               <NormalDistribution />
-            ) : (
+            </TabPanel>
+            <TabPanel>
               <Correlation />
-            )}
-          </Box>
-        </Stack>
+            </TabPanel>
+          </TabPanels>
+        </Tabs>
       </Box>
     </>
   );
