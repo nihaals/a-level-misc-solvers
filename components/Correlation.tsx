@@ -5,8 +5,8 @@ import { HypothesisTestInput, useNumberAsStringState } from "./HypothesisTestInp
 import { jStat } from "jstat";
 
 const getCriticalValue = (sampleSize: number, significanceLevel: number): number => {
-  const foo = Math.pow(jStat.studentt.inv(significanceLevel, sampleSize - 2), 2);
-  return Math.sqrt(foo / (foo + sampleSize - 2));
+  const t = Math.pow(jStat.studentt.inv(significanceLevel, sampleSize - 2), 2);
+  return Math.sqrt(t / (t + sampleSize - 2));
 };
 
 export const Correlation: React.FC<Record<string, never>> = () => {
@@ -20,8 +20,9 @@ export const Correlation: React.FC<Record<string, never>> = () => {
   const actualSignificanceLevel =
     hypothesisInequality === "!=" ? significanceLevel.valueNumber / 2 : significanceLevel.valueNumber;
 
-  const criticalValue = getCriticalValue(sampleSize.valueNumber, actualSignificanceLevel);
-  const rejectH0 = Math.abs(samplePMCC.valueNumber) >= criticalValue;
+  let criticalValue = getCriticalValue(sampleSize.valueNumber, actualSignificanceLevel);
+  if (criticalValue === samplePMCC.valueNumber) criticalValue = NaN;
+  const rejectH0 = Math.abs(samplePMCC.valueNumber) > criticalValue;
 
   return (
     <>
@@ -83,7 +84,7 @@ export const Correlation: React.FC<Record<string, never>> = () => {
         {significanceLevel.valueNumber * 100}% level is {criticalValue}
       </Text>
       <Text>
-        {samplePMCC.valueNumber} {rejectH0 ? "≥" : "<"} {criticalValue}
+        {samplePMCC.valueNumber} {rejectH0 ? ">" : "<"} {criticalValue}
       </Text>
       <Text>
         {rejectH0 ? "Sufficient" : "Insufficient"} evidence to reject {H0} - this suggests there{" "}

@@ -19,8 +19,8 @@ export const OneTailed: React.FC<OneTailedProps> = ({ sampleMean, actualSignific
     return (
       <>
         <Text>
-          P(X̅ {">"} {sampleMean}) = {probability} {probability < actualSignificanceLevel ? "<" : "≥"}{" "}
-          {actualSignificanceLevel}
+          P(X̅ {">"} {sampleMean}) = {probability === actualSignificanceLevel ? NaN : probability}{" "}
+          {probability < actualSignificanceLevel ? "<" : ">"} {actualSignificanceLevel}
         </Text>
         <Text>
           There is {probability < actualSignificanceLevel ? "sufficient" : "insufficient"} evidence to reject H₀,{" "}
@@ -32,8 +32,9 @@ export const OneTailed: React.FC<OneTailedProps> = ({ sampleMean, actualSignific
     return (
       <>
         <Text>
-          P(X̅ {"<"} {sampleMean}) = {probability} {1 - probability < actualSignificanceLevel ? "<" : "≥"}{" "}
-          {1 - actualSignificanceLevel} = 1 - {actualSignificanceLevel}
+          P(X̅ {"<"} {sampleMean}) = {1 - probability === actualSignificanceLevel ? NaN : probability}{" "}
+          {1 - probability < actualSignificanceLevel ? "<" : ">"} {1 - actualSignificanceLevel} = 1 -{" "}
+          {actualSignificanceLevel}
         </Text>
         <Text>
           There is {1 - probability < actualSignificanceLevel ? "sufficient" : "insufficient"} evidence to reject H₀,{" "}
@@ -77,7 +78,7 @@ export const NormalDistribution: React.FC<Record<string, never>> = () => {
   const [hypothesisInequality, setHypothesisInequality] = useState<AlternativeHypothesisInequality>(">");
   const distributionStandardDeviation = useNumberAsStringState("10", (value) => value <= 0);
   const sampleSize = useNumberAsStringState("8", (value) => !Number.isInteger(value) || value <= 0);
-  const sampleMean = useNumberAsStringState("72");
+  const sampleMean = useNumberAsStringState("72", (value) => value === distributionMean.valueNumber);
   const significanceLevel = useNumberAsStringState("0.05", (value) => value <= 0 || value >= 1);
 
   const meanDistribution = gaussian(

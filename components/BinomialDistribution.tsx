@@ -106,7 +106,11 @@ export const BinomialDistribution: React.FC<Record<string, never>> = () => {
   const sampleSize = useNumberAsStringState("40", (value) => !Number.isInteger(value) || value <= 0);
   const sampleValue = useNumberAsStringState(
     "19",
-    (value) => !Number.isInteger(value) || value > sampleSize.valueNumber || value <= 0
+    (value) =>
+      !Number.isInteger(value) ||
+      value <= 0 ||
+      value > sampleSize.valueNumber ||
+      value === sampleSize.valueNumber * testValue.valueNumber
   );
 
   const actualSignificanceLevel =
