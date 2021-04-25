@@ -140,7 +140,7 @@ export const BinomialDistribution: React.FC<Record<string, never>> = () => {
           isInvalid={sampleSize.isInvalid}
         />
         <HypothesisTestInput
-          name="Sample value"
+          name="Successes"
           value={sampleValue.value}
           onChange={sampleValue.setValue}
           isInvalid={sampleValue.isInvalid}
