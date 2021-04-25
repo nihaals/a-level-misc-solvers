@@ -34,7 +34,7 @@ jobs:
 
   codeql:
     name: CodeQL
-    if: github.event_name != 'pull_request' || (github.event_name == 'pull_request' && github.event.head.repo.fork && github.base_ref == 'master')
+    if: github.event_name != 'pull_request' || (github.event_name == 'pull_request' && github.event.head.repo.fork && github.base_ref == 'main')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
